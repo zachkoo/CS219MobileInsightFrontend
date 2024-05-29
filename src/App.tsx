@@ -1,26 +1,72 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { FileListPage } from './pages/FileListPage';
+import LogItemsPage from './pages/ItemListPage';
+import ItemDetailPage from './pages/ItemDetailPage';
+import { Layout, Menu, theme } from 'antd';
+import { FileOutlined } from '@ant-design/icons';
 
-function App() {
+const { Header, Sider, Content } = Layout;
+
+const App: React.FC = () => {
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Layout>
+        <Sider>
+          <div className="demo-logo-vertical" />
+          <MenuComponent />
+        </Sider>
+        <Layout>
+          <Header style={{ padding: 0, background: colorBgContainer }} />
+          <Content
+            style={{
+              margin: '24px 16px',
+              padding: 24,
+              minHeight: 1200,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            <Routes>
+              <Route path="/" element={<FileListPage />} />
+              <Route path="/log/:filename" element={<LogItemsPage />} />
+              <Route path="/item/:logItem" element={<ItemDetailPage />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </Layout>
+    </Router>
   );
-}
+};
+
+const MenuComponent: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Menu
+      theme="dark"
+      mode="inline"
+      defaultSelectedKeys={['1']}
+      items={[
+        {
+          key: '1',
+          icon: <FileOutlined />,
+          label: 'Log File',
+          onClick: () => navigate('/'),
+        },
+        {
+          key: '2',
+          icon: <FileOutlined />,
+          label: 'Test',
+          onClick: () => navigate(''),
+        },
+      ]}
+    />
+  );
+};
 
 export default App;
