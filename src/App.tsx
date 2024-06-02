@@ -61,7 +61,7 @@ const MenuComponent: React.FC = () => {
         {
           key: '2',
           icon: <FileOutlined />,
-          label: 'Test',
+          label: 'Test workflow',
           onClick: () => navigate(''),
         },
       ]}
