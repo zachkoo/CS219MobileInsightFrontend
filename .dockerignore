@@ -3,5 +3,6 @@ build
 .dockerignore
 Dockerfile
 .git
+.github
 .gitignore
 README.md
