@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://3.14.69.0:8080/';
+const BASE_URL = 'http://18.218.252.112:8080/';
 
 export const fetchFileList = async () => {
   try {
