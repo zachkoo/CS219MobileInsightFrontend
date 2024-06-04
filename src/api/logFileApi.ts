@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://3.14.69.0:8080/';
+const BASE_URL = 'http://18.218.252.112:8080/';
 
 export const fetchFileList = async () => {
   try {
@@ -42,12 +42,15 @@ export const queryItemByTime = async (filename: string, start_time: string, end_
   }
 };
 
-export const queryItemByTypeID = async (filename: string, type_id: string) => {
+export const queryItemByTypeID = async (filename: string, type_ids: string[]) => {
   try {
-    const response = await axios.get(`${BASE_URL}search_type_id?filename=${filename}&type_id=${type_id}`);
+    const response = await axios.post(`${BASE_URL}search_type_ids`, {
+      filename,
+      type_ids,
+    });
     return response.data;
   } catch (error) {
-    console.error('Error query item by type id:', error);
+    console.error('Error querying item by type IDs:', error);
     return [];
   }
 };
