@@ -1,49 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { List, Row, Col } from 'antd';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchItemList, queryItemByTime, queryItemByTypeID } from '../api/logFileApi';
+// src/pages/ItemListPage.tsx
+
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { List, Row, Col, Button, InputNumber } from 'antd';
+import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import TimestampFilter from '../components/TimestampFilter';
 import TypeIdFilter from '../components/TypeIdFilter';
-import { DownOutlined, UpOutlined } from '@ant-design/icons';
+import { fetchItemList } from '../api/logFileApi';
 
 const LogItemsPage: React.FC = () => {
   const { filename } = useParams<{ filename: string }>();
   const [itemList, setItemList] = useState<string[]>([]);
   const [filteredList, setFilteredList] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [timestampVisible, setTimestampVisible] = useState(false);
   const [typeIdVisible, setTypeIdVisible] = useState(false);
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
-  const [typeId, setTypeId] = useState<string>('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [typeId, setTypeId] = useState('');
+  const [inputPage, setInputPage] = useState<number | null>(1);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getResult = async () => {
-      if (filename !== undefined) {
-        const result = await fetchItemList(filename);
-        setItemList(result);
-        setFilteredList(result);
-      }
+    const getResponse = async () => {
+      const response = await fetchItemList(filename!, page, 20);
+      setItemList(response.data);
+      setFilteredList(response.data); // 如果需要默认显示全部，可以这么做
+      setPage(response.page);
+      setInputPage(response.page); // 更新输入框的页数
+      setTotalPages(response.pages);
     };
-    getResult();
-  }, [filename]);
+    getResponse();
+  }, [filename, page]);
 
-  const handleSearch = async () => {
-    let result = itemList;
-    if (filename && startTime && endTime) {
-      const timeResult = await queryItemByTime(filename, startTime, endTime);
-      result = result.filter(item => timeResult.includes(item));
+  const handlePageChange = () => {
+    if (inputPage !== null) {
+      setPage(inputPage);
     }
-    if (filename && typeId) {
-      const typeIdResult = await queryItemByTypeID(filename, typeId);
-      result = result.filter(item => typeIdResult.includes(item));
+  };
+
+  const handleSearch = () => {
+    let filtered = itemList;
+
+    if (startTime && endTime) {
+      filtered = filtered.filter(item => {
+        const timestamp = item.split(':')[2];
+        return timestamp >= startTime && timestamp <= endTime;
+      });
     }
-    setFilteredList(result);
+
+    if (typeId) {
+      filtered = filtered.filter(item => item.includes(typeId));
+    }
+
+    setFilteredList(filtered);
   };
 
   return (
     <div>
-      <button onClick={() => navigate(-1)}>Back</button>
+      <Button onClick={() => navigate(-1)}>Back</Button>
       <List
         header={
           <div>
@@ -98,6 +114,19 @@ const LogItemsPage: React.FC = () => {
           );
         }}
       />
+      <div>
+        <Button onClick={() => setPage(page - 1)} disabled={page <= 1}>Previous</Button>
+        <InputNumber
+          min={1}
+          max={totalPages}
+          value={inputPage}
+          onChange={(value) => setInputPage(value)}
+          onPressEnter={handlePageChange}
+          onBlur={handlePageChange}
+        />
+        / {totalPages}
+        <Button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>Next</Button>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://18.218.252.112:8080/';
+const BASE_URL = 'http://3.22.97.231:8080/';
 
-export const fetchFileList = async () => {
+export const fetchFileList = async (page: number, limit: number) => {
   try {
-    const response = await axios.get(`${BASE_URL}`);
+    const response = await axios.get(`${BASE_URL}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching log files:', error);
@@ -12,9 +12,9 @@ export const fetchFileList = async () => {
   }
 };
 
-export const fetchItemList = async (filename: string) => {
+export const fetchItemList = async (filename: string, page: number, limit: number) => {
   try {
-    const response = await axios.get(`${BASE_URL}get_items?filename=${encodeURIComponent(filename)}`);
+    const response = await axios.get(`${BASE_URL}get_items?filename=${encodeURIComponent(filename)}&page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching log file items:', error);
