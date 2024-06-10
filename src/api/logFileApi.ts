@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://18.216.16.239:8080/';
+const BASE_URL = 'http://18.191.243.194:8080/';
 
 export const fetchFileList = async (page: number, limit: number) => {
   const response = await axios.get(`${BASE_URL}`, {
@@ -45,6 +45,27 @@ export const fetchFileInfo = async (filename: string) => {
     params: {
       filename,
     }
+  });
+  return response.data;
+};
+
+export const downloadFilteredFile = async (filename: string, typeIds: string[]) => {
+  const response = await axios.post(`${BASE_URL}download_filtered_logfile`, {
+    filename,
+    type_ids: typeIds
+  }, {
+    responseType: 'blob'
+  });
+  return response.data;
+};
+
+export const uploadFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append('logfile', file);
+  const response = await axios.post(`${BASE_URL}upload_file`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
   return response.data;
 };

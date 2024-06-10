@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { List, Row, Col, Button, Pagination } from 'antd';
+import { List, Row, Col, Button, Pagination, message } from 'antd';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
-import { fetchItemList, fetchFileInfo } from '../api/logFileApi';
+import { fetchItemList, fetchFileInfo, downloadFilteredFile } from '../api/logFileApi';
 import TypeIdFilter from '../components/TypeIdFilter';
 import TimeInput from '../components/TimeInput';
 
@@ -85,6 +85,24 @@ const LogItemsPage: React.FC = () => {
     setPage(1); // 重置页码为第一页
   };
 
+  const handleDownload = async () => {
+    try {
+      const data = await downloadFilteredFile(filename!, selectedTypeIds);
+      const blob = new Blob([data], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename!;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      message.success('Download started');
+    } catch (error) {
+      message.error('Download failed');
+    }
+  };
+
   return (
     <div>
       <Button onClick={() => navigate(-1)}>Back</Button>
@@ -111,6 +129,7 @@ const LogItemsPage: React.FC = () => {
                   selectedTypeIds={selectedTypeIds}
                   onChange={handleTypeIdChange}
                 />
+                <Button onClick={handleDownload} style={{ marginTop: '10px' }}>Download</Button>
               </Col>
             </Row>
           </div>
