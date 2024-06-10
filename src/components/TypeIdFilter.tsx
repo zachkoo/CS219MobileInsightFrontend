@@ -1,24 +1,21 @@
-import React, { useState } from 'react';
-import { Input, Button } from 'antd';
+// src/components/TypeIdFilter.tsx
+
+import React from 'react';
+import { Checkbox } from 'antd';
+import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
 interface TypeIdFilterProps {
-  onSearch: (typeId: string) => void;
+  typeIds: string[];
+  selectedTypeIds: string[];
+  onChange: (checkedValues: CheckboxValueType[]) => void;
 }
 
-const TypeIdFilter: React.FC<TypeIdFilterProps> = ({ onSearch }) => {
-  const [typeId, setTypeId] = useState<string>('');
-
-  return (
-    <div style={{ marginTop: '10px' }}>
-      <Input
-        placeholder="Type ID"
-        value={typeId}
-        onChange={(e) => setTypeId(e.target.value)}
-        style={{ marginBottom: '10px' }}
-      />
-      <Button onClick={() => onSearch(typeId)}>Search</Button>
-    </div>
-  );
-};
+const TypeIdFilter: React.FC<TypeIdFilterProps> = ({ typeIds, selectedTypeIds, onChange }) => (
+  <Checkbox.Group
+    options={typeIds}
+    value={selectedTypeIds}
+    onChange={onChange}
+  />
+);
 
 export default TypeIdFilter;
