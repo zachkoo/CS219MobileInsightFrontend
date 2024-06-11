@@ -11,18 +11,69 @@ const ItemDetailPage: React.FC = () => {
 
   useEffect(() => {
     const getResult = async () => {
-      if (logItem !== undefined){
+      if (logItem !== undefined) {
         const result = await fetchItemDetail(logItem);
         setItemDetail(result);
-      }   
+      }
     };
     getResult();
   }, [logItem]);
 
+  const parseMsgField = (msg: string) => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(msg, "text/xml");
+
+    const convertXmlToTreeData = (node: Element, parentKey: string = ''): DataNode[] => {
+      const children = Array.from(node.children);
+      const attributes = Array.from(node.attributes);
+      const attributeNodes: DataNode[] = attributes.map((attr, index) => {
+        const attrKey = parentKey ? `${parentKey}-attr-${attr.name}` : `attr-${attr.name}`;
+        return {
+          title: (
+            <div>
+              <strong>{attr.name}:</strong> {attr.value}
+            </div>
+          ),
+          key: attrKey,
+        };
+      });
+      
+      const childNodes: DataNode[] = children.map((child, index) => {
+        const nodeKey = parentKey ? `${parentKey}-${index}` : `${index}`;
+        return {
+          title: child.nodeName,
+          key: nodeKey,
+          children: convertXmlToTreeData(child, nodeKey),
+        };
+      });
+
+      const valueNode: DataNode[] = node.textContent?.trim() && !children.length
+        ? [{
+            title: (
+              <div>
+                <strong>value:</strong> {node.textContent}
+              </div>
+            ),
+            key: `${parentKey}-value`,
+          }]
+        : [];
+
+      return [...attributeNodes, ...valueNode, ...childNodes];
+    };
+
+    return convertXmlToTreeData(xmlDoc.documentElement);
+  };
+
   const convertToTreeData = (data: any, parentKey: string = ''): DataNode[] => {
     return Object.entries(data).map(([key, value], index) => {
       const nodeKey = parentKey ? `${parentKey}-${key}` : key;
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
+      if (key === 'Msg' && typeof value === 'string') {
+        return {
+          title: key,
+          key: nodeKey,
+          children: parseMsgField(value),
+        };
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
         return {
           title: key,
           key: nodeKey,
